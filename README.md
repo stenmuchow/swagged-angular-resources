@@ -1,0 +1,2 @@
+swagged-angular-resource
+========================
