@@ -1,0 +1,137 @@
+'use strict';
+
+require('angular');
+require('angular-resource');
+
+module.exports = angular.module('swaggedResources', ['ngResource'])
+.config(function($provide, $resourceProvider) {
+  $provide.value('apiUrl', '{{apiUrl}}');
+  $resourceProvider.defaults.stripTrailingSlashes = false;
+})
+{{#each apiResources}}
+.{{../angularProviderType}}('{{camelize @key}}{{../angularProviderSuffix}}', function(apiUrl, $resource, $injector) {
+  {{#each this}}
+  this.{{classify nickname}} = function(data, callback{{#if isGet}}, url{{/if}}) {
+    {{#each ../../apiTypes}}
+    var {{this}}{{../../../angularProviderSuffix}} = $injector.get('{{this}}{{../../../angularProviderSuffix}}');
+    {{/each}}
+
+    {{#if isQuery}}
+    return $resource(apiUrl + '{{angularPath}}', null, {query: {method: 'GET', params: data, isArray: false}})
+      .query(function(response) {
+        return callback ? callback(null, response) : response;
+      }, function(error) {
+        if (callback) return callback(error);
+        throw error;
+      });
+    {{/if}}
+    {{#if isGet}}
+    if(typeof data === 'function') {
+      url = callback;
+      callback = data;
+      data = {};
+    }
+
+    url = url || apiUrl + '{{angularPath}}';
+    return $resource(url)
+      .get(data, function (response) {
+        {{#each singleNestedResource}}
+        response.get{{classify name}} = function (callback) {
+          if(!response._{{name}} && response.{{name}}) {
+            response._{{name}} = response.{{name}};
+            response.{{name}} = {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, response._{{name}});
+          }
+        };
+
+        {{/each}}
+        {{#each multipleNestedResource}}
+        response.get{{classify name}} = function (callback) {
+          if(!response._{{name}} && response.{{name}}) {
+            response._{{name}} = response.{{name}};
+            response.{{name}}.objects = (response._{{name}}.objects || []).map(function(url) {
+              return {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, url);
+            });
+          }
+        };
+
+        response.add{{classify name}} = function (obj) {
+          url = typeof obj === 'object' ? obj.url : obj;
+          (response._{{name}} || (response.{{name}})).objects.push(url);
+        };
+
+        {{/each}}
+        return callback ? callback(null, response) : response;
+      }, function(error) {
+        if(callback) return callback(error);
+        throw error;
+      });
+    {{/if}}
+    {{#if isPost}}
+    {{#each singleNestedResource}}
+    data.{{name}} = data._{{name}} ? data.{{name}}.url : data.{{name}};
+    delete data._{{name}};
+
+    {{/each}}
+    {{#each multipleNestedResource}}
+    data.{{name}} = {
+      objects: data._{{name}}
+        ? data.{{name}}.objects.map(function(o) { return o.url; })
+        : (data.{{name}} ? data.{{name}}.objects : [])
+    };
+    delete data._{{name}};
+
+    {{/each}}
+    return $resource(apiUrl + '{{angularPath}}')
+      .save(data, function(response) {
+        return callback ? callback(null, response) : response;
+      }, function(error) {
+        if(callback) return callback(error);
+        throw error;
+      });
+    {{/if}}
+    {{#if isPut}}
+    {{#each singleNestedResource}}
+    data.{{name}} = data._{{name}} ? data.{{name}}.url : data.{{name}};
+    delete data._{{name}};
+
+    {{/each}}
+    {{#each multipleNestedResource}}
+    data.{{name}} = {
+      objects: data._{{name}}
+        ? data.{{name}}.objects.map(function(o) { return o.url; })
+        : (data.{{name}} ? data.{{name}}.objects : [])
+    };
+    delete data._{{name}};
+
+    {{/each}}
+    return $resource(apiUrl + '{{angularPath}}', {id: '@id'}, {update: {method: 'PUT'}})
+      .update(data, function(response) {
+        return callback ? callback(null, response) : response;
+      }, function(error) {
+        if(callback) return callback(error);
+        throw error;
+      });
+    {{/if}}
+    {{#if isDelete}}
+    return $resource(apiUrl + '{{angularPath}}', {id: '@id'})
+      .delete(data, function(response) {
+        return callback ? callback(null, response) : response;
+      }, function(error) {
+        if(callback) return callback(error);
+        throw error;
+      });
+    {{/if}}
+    {{#if isPatch}}
+    return $resource(apiUrl + '{{angularPath}}', {id: '@id'}, {patch: {method: 'PATCH'}})
+      .patch(data, function(response) {
+        return callback ? callback(null, response) : response;
+      }, function(error) {
+        if (callback) return callback(error);
+        throw error;
+      });
+    {{/if}}
+  };
+
+  {{/each}}
+})
+{{/each}};
