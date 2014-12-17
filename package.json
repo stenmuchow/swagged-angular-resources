@@ -5,8 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "coffee --compile src/index.coffee",
-    "build-service": "node src/index.js"
+    "build": "coffee --compile src/index.coffee"
   },
   "author": "Michael Wolbert",
   "license": "MIT",
