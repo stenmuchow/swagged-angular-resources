@@ -2,20 +2,17 @@ swagged-angular-resource
 ========================
 AngularJS $resource service generator for Swagger documentated endpoints.
 
-*Install*
+
+*Building to .bin directory*
 ```bash
-$ npm install
-```
-and,
-```bash
-$ npm run build
+$ npm install && gulp
 ```
 *Usage*
 ```bash
-node src/index.js <endpoint> <filename.js>
+node .bin/swagged-angular-resource <endpoint> <filename.js>
 ```
 * endpoint (ie. 'http:/localhost:8000/docs/api-docs')
 * filename.js is output filename for generated AmgularJS file (relative to npm current working directory) 
 
 *TODO*
-...
+* Make .bin/swagged-angular-resource.js executable for global execution
