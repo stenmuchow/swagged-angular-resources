@@ -118,7 +118,7 @@
         data = {
           angularProviderType: "service",
           angularProviderSuffix: "ResourceService",
-          apiUrl: "http:/" + apiUrl,
+          apiUrl: "http://" + apiUrl.host,
           apiTypes: _.keys(byApiResources),
           apiResources: byApiResources,
           apiNestedResources: byNestedApiResource
@@ -127,7 +127,7 @@
           encoding: "utf-8"
         });
         code = handlebars.compile(tpl)(data);
-        return fs.writeFileSync(process.argv[3], code, {
+        return fs.writeFileSync(outputFile, code, {
           flags: "w+"
         });
       });

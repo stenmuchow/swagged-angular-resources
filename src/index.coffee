@@ -96,7 +96,7 @@ getResources = (apiUrl, outputFile) ->
       data = {
         angularProviderType: "service"
         angularProviderSuffix: "ResourceService"
-        apiUrl: "http:/#{apiUrl}"
+        apiUrl: "http://#{apiUrl.host}"
         apiTypes: _.keys(byApiResources)
         apiResources: byApiResources
         apiNestedResources: byNestedApiResource
@@ -104,7 +104,7 @@ getResources = (apiUrl, outputFile) ->
 
       tpl = fs.readFileSync("src/templates/swagged-resources.hbs", {encoding: "utf-8"})
       code = handlebars.compile(tpl)(data)
-      fs.writeFileSync(process.argv[3], code, {flags: "w+"})
+      fs.writeFileSync(outputFile, code, {flags: "w+"})
     )
 
 apiUrl = url.parse process.argv[2]
