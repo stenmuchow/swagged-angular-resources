@@ -73,9 +73,9 @@ getResources = (apiUrl, outputFile) ->
             format = vs.format.replace('{pk}', '{id}');
             nested =  byNestedApiResource[format][0]
             {
-            name: ks
-            type: nested.type
-            nickname: nested.nickname
+              name: ks
+              type: nested.type
+              nickname: nested.nickname
             }
           )
 
@@ -84,9 +84,9 @@ getResources = (apiUrl, outputFile) ->
             format = vm.items.format.replace('{pk}', '{id}');
             nested =  byNestedApiResource[format][0]
             {
-            name: ks
-            type: nested.type
-            nickname: nested.nickname
+              name: ks
+              type: nested.type
+              nickname: nested.nickname
             }
           )
       )
