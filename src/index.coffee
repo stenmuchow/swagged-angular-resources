@@ -70,7 +70,7 @@ getResources = (apiUrl, outputFile) ->
       _.each(results, (result, k) ->
         results[k].singleNestedResource =
           _.map(result.singleNestedResource, (vs, ks) ->
-            format = vs.format.replace('{pk}', '{id}');
+            format = vs.format.replace('{pk}', '{id}')
             nested =  byNestedApiResource[format][0]
             {
               name: ks
@@ -81,7 +81,7 @@ getResources = (apiUrl, outputFile) ->
 
         results[k].multipleNestedResource =
           _.map(result.multipleNestedResource, (vm, ks) ->
-            format = vm.items.format.replace('{pk}', '{id}');
+            format = vm.items.format.replace('{pk}', '{id}')
             nested =  byNestedApiResource[format][0]
             {
               name: ks

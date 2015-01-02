@@ -37,26 +37,20 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .get(data, function (response) {
         {{#each singleNestedResource}}
         response.get{{classify name}} = function (callback) {
-          if(!response._{{name}} && response.{{name}}) {
-            response._{{name}} = response.{{name}};
-            response.{{name}} = {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, response._{{name}});
-          }
+          response.{{name}} = {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, (response.{{name}}.url || response.{{name}}));
         };
 
         {{/each}}
         {{#each multipleNestedResource}}
         response.get{{classify name}} = function (callback) {
-          if(!response._{{name}} && response.{{name}}) {
-            response._{{name}} = response.{{name}};
-            response.{{name}}.objects = (response._{{name}}.objects || []).map(function(url) {
-              return {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, url);
-            });
-          }
+          response.{{name}}.objects = (response.{{name}}.objects || []).map(function(obj) {
+            return {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, (obj.url || obj));
+          });
         };
 
         response.add{{classify name}} = function (obj) {
           url = typeof obj === 'object' ? obj.url : obj;
-          (response._{{name}} || (response.{{name}})).objects.push(url);
+          response.{{name}}.objects.push(url);
         };
 
         {{/each}}
@@ -68,17 +62,13 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
     {{/if}}
     {{#if isPost}}
     {{#each singleNestedResource}}
-    data.{{name}} = data._{{name}} ? data.{{name}}.url : data.{{name}};
-    delete data._{{name}};
+    data.{{name}} = data.{{name}}.url || data.{{name}};
 
     {{/each}}
     {{#each multipleNestedResource}}
     data.{{name}} = {
-      objects: data._{{name}}
-        ? data.{{name}}.objects.map(function(o) { return o.url; })
-        : (data.{{name}} ? data.{{name}}.objects : [])
+      objects: data.{{name}}.objects.map(function(obj) { return (obj.url || obj); })
     };
-    delete data._{{name}};
 
     {{/each}}
     return $resource(apiUrl + '{{angularPath}}')
@@ -91,17 +81,13 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
     {{/if}}
     {{#if isPut}}
     {{#each singleNestedResource}}
-    data.{{name}} = data._{{name}} ? data.{{name}}.url : data.{{name}};
-    delete data._{{name}};
+    data.{{name}} = data.{{name}}.url || data.{{name}};
 
     {{/each}}
     {{#each multipleNestedResource}}
     data.{{name}} = {
-      objects: data._{{name}}
-        ? data.{{name}}.objects.map(function(o) { return o.url; })
-        : (data.{{name}} ? data.{{name}}.objects : [])
+      objects: data.{{name}}.objects.map(function(obj) { return (obj.url || obj); })
     };
-    delete data._{{name}};
 
     {{/each}}
     return $resource(apiUrl + '{{angularPath}}', {id: '@id'}, {update: {method: 'PUT'}})
