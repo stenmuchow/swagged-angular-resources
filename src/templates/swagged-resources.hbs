@@ -62,17 +62,35 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
     {{/if}}
     {{#if isPost}}
     {{#each singleNestedResource}}
-    data.{{name}} = data.{{name}}.url || data.{{name}};
+    if(data.{{name}}) data.{{name}} = data.{{name}}.url || data.{{name}};
 
     {{/each}}
     {{#each multipleNestedResource}}
-    data.{{name}} = {
-      objects: data.{{name}}.objects.map(function(obj) { return (obj.url || obj); })
-    };
+    if(data.{{name}} && data.{{name}}.objects) data.{{name}}.objects = data.{{name}}.objects.map(function(obj) { return (obj.url || obj); });
 
     {{/each}}
     return $resource(apiUrl + '{{angularPath}}')
       .save(data, function(response) {
+        {{#each singleNestedResource}}
+        response.get{{classify name}} = function (callback) {
+          response.{{name}} = {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, (response.{{name}}.url || response.{{name}}));
+        };
+
+        {{/each}}
+        {{#each multipleNestedResource}}
+        response.get{{classify name}} = function (callback) {
+          response.{{name}}.objects = (response.{{name}}.objects || []).map(function(obj) {
+            return {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, (obj.url || obj));
+          });
+        };
+
+        response.add{{classify name}} = function (obj) {
+          url = typeof obj === 'object' ? obj.url : obj;
+          response.{{name}}.objects.push(url);
+        };
+
+        {{/each}}
+
         return callback ? callback(null, response) : response;
       }, function(error) {
         if(callback) return callback(error);
@@ -81,13 +99,11 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
     {{/if}}
     {{#if isPut}}
     {{#each singleNestedResource}}
-    data.{{name}} = data.{{name}}.url || data.{{name}};
+    if(data.{{name}}) data.{{name}} = data.{{name}}.url || data.{{name}};
 
     {{/each}}
     {{#each multipleNestedResource}}
-    data.{{name}} = {
-      objects: data.{{name}}.objects.map(function(obj) { return (obj.url || obj); })
-    };
+    if(data.{{name}} && data.{{name}}.objects) data.{{name}}.objects = data.{{name}}.objects.map(function(obj) { return (obj.url || obj); });
 
     {{/each}}
     return $resource(apiUrl + '{{angularPath}}', {id: '@id'}, {update: {method: 'PUT'}})
