@@ -56,7 +56,7 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
         {{/each}}
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) return callback(error);
+        if(callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -93,7 +93,7 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
 
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) return callback(error);
+        if(callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -110,7 +110,7 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .update(data, function(response) {
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) return callback(error);
+        if(callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -119,7 +119,7 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .delete(data, function(response) {
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) return callback(error);
+        if(callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -128,7 +128,7 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .patch(data, function(response) {
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if (callback) return callback(error);
+        if (callback) callback(error);
         throw error;
       });
     {{/if}}
