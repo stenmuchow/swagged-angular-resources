@@ -72,8 +72,12 @@
               return memo.push({
                 type: _.str.camelize(apiResource.path.replace('/', '')),
                 nickname: _.str.classify(operation.nickname),
-                isQuery: operation.method === "GET" && !operation.parameters,
-                isGet: operation.method === 'GET' && operation.parameters !== void 0,
+                isQuery: operation.method === "GET" && _.all(operation.parameters, function(parameter) {
+                  return parameter.paramType === 'query';
+                }),
+                isGet: operation.method === 'GET' && _.some(operation.parameters, function(parameter) {
+                  return parameter.paramType === 'path';
+                }),
                 isPost: operation.method === 'POST',
                 isDelete: operation.method === 'DELETE',
                 isPut: operation.method === 'PUT',

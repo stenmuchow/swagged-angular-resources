@@ -47,8 +47,8 @@ getResources = (apiUrl, outputFile) ->
               type: _.str.camelize(apiResource.path.replace('/', ''))
               nickname: _.str.classify(operation.nickname)
 
-              isQuery: operation.method == "GET" and !operation.parameters
-              isGet: operation.method == 'GET' and operation.parameters != undefined
+              isQuery: operation.method == "GET" and _.all(operation.parameters, (parameter) -> parameter.paramType == 'query')
+              isGet: operation.method == 'GET' and _.some(operation.parameters, (parameter) -> parameter.paramType == 'path')
               isPost: operation.method == 'POST'
               isDelete: operation.method == 'DELETE'
               isPut: operation.method == 'PUT'
