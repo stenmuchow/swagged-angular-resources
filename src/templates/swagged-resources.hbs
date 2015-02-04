@@ -4,19 +4,23 @@ require('angular');
 require('angular-resource');
 
 module.exports = angular.module('swaggedResources', ['ngResource'])
-.config(function($provide, $resourceProvider) {
-  $provide.value('apiUrl', '{{apiUrl}}');
+.config(function($resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = false;
 })
 {{#each apiResources}}
-.{{../angularProviderType}}('{{camelize @key}}{{../angularProviderSuffix}}', function(apiUrl, $resource, $injector) {
+.{{../angularProviderType}}('{{camelize @key}}{{../angularProviderSuffix}}', function($resource, $injector) {
   {{#each this}}
   this.{{classify nickname}} = function(data, callback{{#if isGet}}, url{{/if}}) {
+    var apiUrl = $injector.get('apiUrl');
     {{#each ../../apiTypes}}
     var {{this}}{{../../../angularProviderSuffix}} = $injector.get('{{this}}{{../../../angularProviderSuffix}}');
     {{/each}}
 
     {{#if isQuery}}
+    if(typeof data === 'function') {
+      callback = data;
+    }
+
     return $resource(apiUrl + '{{angularPath}}', null, {query: {method: 'GET', params: data, isArray: false}})
       .query(function(response) {
         return callback ? callback(null, response) : response;
