@@ -9,6 +9,13 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
 })
 {{#each apiResources}}
 .{{../angularProviderType}}('{{camelize @key}}{{../angularProviderSuffix}}', function($resource, $injector) {
+  function {{classify @key}}ResourceError(error) {
+    this.error = error;
+  }
+  {{classify @key}}ResourceError.prototype = Object.create(Error.prototype);
+  {{classify @key}}ResourceError.prototype.constructor = {{classify @key}}ResourceError;
+  {{classify @key}}ResourceError.prototype.name = '{{classify @key}}ResourceError';
+
   {{#each this}}
   this.{{classify nickname}} = function(data, callback{{#if isGet}}, url{{/if}}) {
     var apiUrl = $injector.get('apiUrl');
@@ -25,7 +32,8 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .query(function(response) {
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if (callback) return callback(error);
+        error = new {{classify @../key}}ResourceError(error);
+        if (callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -60,7 +68,8 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
         {{/each}}
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) callback(error);
+        error = new {{classify @../key}}ResourceError(error);
+        if (callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -97,7 +106,8 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
 
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) callback(error);
+        error = new {{classify @../key}}ResourceError(error);
+        if (callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -114,7 +124,8 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .update(data, function(response) {
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) callback(error);
+        error = new {{classify @../key}}ResourceError(error);
+        if (callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -123,7 +134,8 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .delete(data, function(response) {
         return callback ? callback(null, response) : response;
       }, function(error) {
-        if(callback) callback(error);
+        error = new {{classify @../key}}ResourceError(error);
+        if (callback) callback(error);
         throw error;
       });
     {{/if}}
@@ -132,6 +144,7 @@ module.exports = angular.module('swaggedResources', ['ngResource'])
       .patch(data, function(response) {
         return callback ? callback(null, response) : response;
       }, function(error) {
+        error = new {{classify @../key}}ResourceError(error);
         if (callback) callback(error);
         throw error;
       });
