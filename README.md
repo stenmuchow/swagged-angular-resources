@@ -5,7 +5,7 @@ AngularJS $resource service generator for Swagger documentated endpoints.
 
 *Building to .bin directory*
 ```bash
-$ npm install
+$ npm install && gulp
 $ npm install uglify-js -g
 ```
 *Usage*
