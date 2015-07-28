@@ -1,0 +1,292 @@
+'use strict';
+
+require('angular');
+require('angular-resource');
+
+module.exports = angular.module('swaggedResources', ['ngResource'])
+
+var app = angular.module('swaggedResources');
+
+app.config(function($resourceProvider) {
+$resourceProvider.defaults.stripTrailingSlashes = false;
+});
+
+{{#each apiResources}}
+
+    app.{{../angularProviderType}}('{{camelize @key}}{{../angularProviderSuffix}}', {{camelize @key}}{{../angularProviderSuffix}});
+
+    {{camelize @key}}{{../angularProviderSuffix}}.$inject = ['$resource', 'apiUrl'];
+
+    function {{camelize @key}}{{../angularProviderSuffix}}($resource, apiUrl) {
+        var service = this;
+
+        function {{classify @key}}ResourceError(error) {
+            this.error = error;
+        }
+        {{classify @key}}ResourceError.prototype = Object.create(Error.prototype);
+        {{classify @key}}ResourceError.prototype.constructor = {{classify @key}}ResourceError;
+        {{classify @key}}ResourceError.prototype.name = '{{classify @key}}ResourceError';
+
+    {{!-----------------}}
+    {{!--service loop --}}
+    {{!-----------------}}
+
+    {{#each this}}
+
+        {{!-------------------}}
+        {{!-- isQuery Block   }}
+        {{!-------------------}}
+
+        {{#if isQuery}}
+
+            service.{{classify nickname}} = function(data, callback) {
+
+                if(typeof data === 'function') {
+                    callback = data;
+                }
+
+                return $resource(apiUrl + '{{angularPath}}', null, {query: {method: 'GET', params: data, isArray: false}})
+                    .query(
+                        function(response) {
+                            return callback ? callback(null, response) : response;
+                        },
+                        function(error) {
+
+                            error = new {{classify @../key}}ResourceError(error);
+
+                            if (callback)  {
+                                callback(error);
+                            }
+
+                            throw error;
+
+                        }
+                    );
+            };
+
+        {{/if}}
+
+        {{!--------------------------}}
+        {{!-- End of isQuery Block --}}
+        {{!--------------------------}}
+
+
+        {{!-----------------}}
+        {{!-- isGet Block --}}
+        {{!-----------------}}
+
+        {{#if isGet}}
+
+            service.{{classify nickname}} = function(data, callback, url) {
+
+                if(typeof data === 'function') {
+                    url = callback;
+                    callback = data;
+                    data = {};
+                }
+
+                url = url || apiUrl + '{{angularPath}}';
+
+                return $resource(url)
+                    .get(data,
+                        function (response) {
+
+                        {{#each singleNestedResource}}
+                            response.get{{classify name}} = function (callback) {
+                                response.{{name}} = {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, (response.{{name}}.url || response.{{name}}));
+                            };
+                        {{/each}}
+
+                        {{#each multipleNestedResource}}
+                            response.get{{classify name}} = function (callback) {
+                                response.{{name}}.objects = (response.{{name}}.objects || []).map(function(obj) {
+                                    return service.{{classify nickname}}({}, callback, (obj.url || obj));
+                                });
+                            };
+
+                            response.add{{classify name}} = function (obj) {
+                                url = typeof obj === 'object' ? obj.url : obj;
+                                response.{{name}}.objects.push(url);
+                            };
+                        {{/each}}
+
+                        return callback ? callback(null, response) : response;
+                        },
+                        function(error) {
+                            error = new {{classify @../key}}ResourceError(error);
+                            if (callback) { callback(error); }
+                            throw error;
+                        }
+                    );
+            };
+
+        {{/if}}
+        {{!------------------------}}
+        {{!-- End of isGet Block --}}
+        {{!------------------------}}
+
+
+        {{!------------------}}
+        {{!-- isPost Block --}}
+        {{!------------------}}
+        {{#if isPost}}
+            service.{{classify nickname}} = function(data, callback) {
+
+                {{#each singleNestedResource}}
+                    if(data.{{name}}) data.{{name}} = data.{{name}}.url || data.{{name}};
+                {{/each}}
+
+                {{#each multipleNestedResource}}
+                    if(data.{{name}} && data.{{name}}.objects) data.{{name}}.objects = data.{{name}}.objects.map(function(obj) { return (obj.url || obj); });
+                {{/each}}
+
+                return $resource(apiUrl + '{{angularPath}}')
+
+                    .save(data,
+                        function(response) {
+
+                        {{#each singleNestedResource}}
+                            response.get{{classify name}} = function (callback) {
+                            response.{{name}} = {{type}}{{../../../../angularProviderSuffix}}.{{classify nickname}}({}, callback, (response.{{name}}.url || response.{{name}}));
+                            };
+
+                        {{/each}}
+
+
+                        {{#each multipleNestedResource}}
+                            response.get{{classify name}} = function (callback) {
+                                response.{{name}}.objects = (response.{{name}}.objects || []).map(function(obj) {
+                                    return service.{{classify nickname}}({}, callback, (obj.url || obj));
+                                });
+                            };
+
+                            response.add{{classify name}} = function (obj) {
+                                url = typeof obj === 'object' ? obj.url : obj;
+                                response.{{name}}.objects.push(url);
+                            };
+                        {{/each}}
+
+                            return callback ? callback(null, response) : response;
+                        },
+                        function(error) {
+                            error = new {{classify @../key}}ResourceError(error);
+
+                            if (callback) {
+                                callback(error);
+                            }
+
+                            throw error;
+                        }
+                    );
+            };
+
+        {{/if}}
+
+        {{!-------------------------}}
+        {{!-- End of isPost Block --}}
+        {{!-------------------------}}
+
+
+        {{!-----------------}}
+        {{!-- isPut Block --}}
+        {{!-----------------}}
+        {{#if isPut}}
+            service.{{classify nickname}} = function(data, callback) {
+
+                {{#each singleNestedResource}}
+                    if(data.{{name}}) data.{{name}} = data.{{name}}.url || data.{{name}};
+                {{/each}}
+
+                {{#each multipleNestedResource}}
+                    if(data.{{name}} && data.{{name}}.objects) data.{{name}}.objects = data.{{name}}.objects.map(function(obj) { return (obj.url || obj); });
+                {{/each}}
+
+                return $resource(apiUrl + '{{angularPath}}', {id: '@id'}, {update: {method: 'PUT'}})
+                    .update(data,
+                        function(response) {
+                            return callback ? callback(null, response) : response;
+                        },
+                        function(error) {
+                            error = new {{classify @../key}}ResourceError(error);
+
+                            if (callback) {
+                                callback(error);
+                            }
+
+                            throw error;
+                        }
+                    );
+            };
+
+        {{/if}}
+
+        {{!-------------------------}}
+        {{!-- End of isPost Block --}}
+        {{!-------------------------}}
+
+
+        {{!--------------------}}
+        {{!-- isDelete Block --}}
+        {{!--------------------}}
+        {{#if isDelete}}
+            service.{{classify nickname}} = function(data, callback) {
+
+                return $resource(apiUrl + '{{angularPath}}', {id: '@id'})
+                    .delete(data,
+                        function(response) {
+                            return callback ? callback(null, response) : response;
+                        },
+                        function(error) {
+                            error = new {{classify @../key}}ResourceError(error);
+                            if (callback) { callback(error); }
+                            throw error;
+                        }
+                    );
+            };
+
+        {{/if}}
+        {{!---------------------------}}
+        {{!-- End of isDelete Block --}}
+        {{!---------------------------}}
+
+
+        {{!-------------------}}
+        {{!-- isPatch Block --}}
+        {{!-------------------}}
+        {{#if isPatch}}
+            service.{{classify nickname}} = function(data, params, callback) {
+
+                if(typeof params === 'function') {
+                    callback = params;
+                    params = {};
+                }
+
+                return $resource(apiUrl + '{{angularPath}}', {id: '@id'}, {patch: {method: 'PATCH'}})
+                    .patch(data,
+                        function(response) {
+                            return callback ? callback(null, response) : response;
+                        },
+                        function(error) {
+                            error = new {{classify @../key}}ResourceError(error);
+                            if (callback) { callback(error); }
+                            throw error;
+                        }
+                    );
+            };
+
+        {{/if}}
+        {{!--------------------------}}
+        {{!-- End of isPatch Block --}}
+        {{!--------------------------}}
+
+
+    {{/each}}
+
+    {{!--------------------------}}
+    {{!-- End of Service Loop --}}
+    {{!--------------------------}}
+
+
+    } {{!-- Closing bracket for service --}}
+
+{{/each}}; {{!-- End of apiResources Loop --}}
