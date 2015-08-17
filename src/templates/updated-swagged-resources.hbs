@@ -262,7 +262,7 @@ $resourceProvider.defaults.stripTrailingSlashes = false;
                 }
 
                 return $resource(apiUrl + '{{angularPath}}', {id: '@id'}, {patch: {method: 'PATCH'}})
-                    .patch(data,
+                    .patch(params, data,
                         function(response) {
                             return callback ? callback(null, response) : response;
                         },

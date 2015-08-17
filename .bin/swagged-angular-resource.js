@@ -127,7 +127,7 @@
           apiResources: byApiResources,
           apiNestedResources: byNestedApiResource
         };
-        tpl = fs.readFileSync("src/templates/swagged-resources.hbs", {
+        tpl = fs.readFileSync("src/templates/updated-swagged-resources.hbs", {
           encoding: "utf-8"
         });
         code = handlebars.compile(tpl)(data);
